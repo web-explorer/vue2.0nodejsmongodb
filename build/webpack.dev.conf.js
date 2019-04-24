@@ -10,6 +10,24 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 const portfinder = require('portfinder')
 
+//第一步
+/*const express = require('express');
+const app = express();
+var appData = require('../data.json');
+var seller = appData.seller;
+var goods = appData.goods;
+var ratings = appData.ratings;
+var apiRouter = express.Router();
+app.use('/api',apiRouters);*/
+const express = require('express');
+const app = express();
+const goodsData = require('./../mock/goods.json');
+/*var router = express.Router();
+router.get('/goods',function(req,res){console.log(111111);
+  res.json(goodsData);
+});
+app.use('/',router);*/
+
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
 
@@ -44,6 +62,32 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       poll: config.dev.poll,
     }
   },
+  //第二步
+ /* before(app) {
+    app.get('/api/seller', (req, res) => {
+      res.json({
+        errno: 0,
+        data: seller
+      })
+    }),
+    app.get('/api/goods', (req, res) => {
+      res.json({
+        errno: 0,
+        data: goods
+      })
+    }),
+    app.get('/api/ratings', (req, res) => {
+      res.json({
+        errno: 0,
+        data: ratings
+      })
+    })
+  },*/
+ /*before(app) {
+   app.get('/goods', (req, res) => {
+     res.json(goodsData);
+   })
+ },*/
   plugins: [
     new webpack.DefinePlugin({
       'process.env': require('../config/dev.env')
@@ -64,7 +108,18 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         to: config.dev.assetsSubDirectory,
         ignore: ['.*']
       }
-    ])
+    ])/*,
+    new webpack.LoaderOptionsPlugin({
+      // test: /\.xxx$/, // may apply this only for some modules
+      options: {
+        before: function(app) {
+          app.get('/goods', (req, res) => {
+            res.json(goodsData);
+          })
+        }
+      }
+    })*/
+
   ]
 })
 
