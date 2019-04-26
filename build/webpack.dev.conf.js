@@ -40,6 +40,11 @@ const devWebpackConfig = merge(baseWebpackConfig, {
 
   // these devServer options should be customized in /config/index.js
   devServer: {
+    before(app) {
+      app.get('/goods', (req, res) => {
+        res.json(goodsData);
+      })
+    },
     clientLogLevel: 'warning',
     historyApiFallback: {
       rewrites: [
@@ -83,11 +88,6 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       })
     })
   },*/
- /*before(app) {
-   app.get('/goods', (req, res) => {
-     res.json(goodsData);
-   })
- },*/
   plugins: [
     new webpack.DefinePlugin({
       'process.env': require('../config/dev.env')
