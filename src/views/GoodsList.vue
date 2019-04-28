@@ -20,7 +20,7 @@
                 <dd><a href="javascript:void(0)" @click="priceChecked = 'all'" v-bind:class="{'cur': priceChecked == 'all'}">All</a></dd>
 
                 <dd v-for="(price, index) in priceFilter">
-                  <a href="javascript:void(0)" @click="priceChecked = index" v-bind:class="{'cur': priceChecked == index}">{{price.startPrice}} - {{price.endPrice}}</a>
+                  <a href="javascript:void(0)" @click="setPriceFilter(index)" v-bind:class="{'cur': priceChecked == index}">{{price.startPrice}} - {{price.endPrice}}</a>
                 </dd>
 
                 <!--<dd>
@@ -45,7 +45,7 @@
 
                   <li v-for="item in goodsList">
                     <div class="pic">
-                      <a href="#"><img v-bind:src="`static/${item.productImg}`" alt=""></a>
+                      <a href="#"><img v-lazy="`static/${item.productImg}`" alt=""></a>
                     </div>
                     <div class="main">
                       <div class="name">{{item.productName}}</div>
@@ -163,11 +163,16 @@
           },
           showFilterPop() {
             this.filterBy = true;
-            this.overLayFlag = true
+            this.overLayFlag = true;
+          },
+          setPriceFilter(index) {
+            this.priceChecked = index,
+            this.filterBy = false;
+            this.overLayFlag = false;
           },
           closePop() {
             this.filterBy = false;
-            this.overLayFlag = false
+            this.overLayFlag = false;
           }
         }
     }
