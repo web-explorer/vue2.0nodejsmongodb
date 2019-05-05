@@ -8,16 +8,16 @@
         <div class="container">
           <div class="filter-nav">
             <span class="sortby">Sort by:</span>
-            <a href="javascript:void(0)" class="default cur">Default</a>
-            <a href="javascript:void(0)" class="price">Price <svg class="icon icon-arrow-short"><use xlink:href="#icon-arrow-short"></use></svg></a>
-            <a href="javascript:void(0)" class="filterby stopPop" @click="showFilterPop">Filter by</a>
+            <a href="javascript:void(0)" class="default" @click="sortProducts(0)" v-bind:class="{'cur': sortByPrice == 0}">Default</a>
+            <a href="javascript:void(0)" class="price" @click="sortProducts()" v-bind:class="{'cur': sortByPrice != 0}">Price <span v-bind:class="{'hidden': sortByPrice == 0, 'fa': sortByPrice != 0, 'fa-arrow-up': sortByPrice == 1, 'fa-arrow-down': sortByPrice == -1}"></span></a>
+            <a href="javascript:void(0)" class="filterby stopPop" @click.stop="showFilterPop">Filter by</a>
           </div>
           <div class="accessory-result">
             <!-- filter -->
             <div class="filter stopPop" id="filter" v-bind:class="{'filterby-show': filterBy}">
               <dl class="filter-price">
                 <dt>Price:</dt>
-                <dd><a href="javascript:void(0)" @click="priceChecked = 'all'" v-bind:class="{'cur': priceChecked == 'all'}">All</a></dd>
+                <dd><a href="javascript:void(0)" @click="setPriceFilter(-1)" v-bind:class="{'cur': priceChecked == -1}">All</a></dd>
 
                 <dd v-for="(price, index) in priceFilter">
                   <a href="javascript:void(0)" @click="setPriceFilter(index)" v-bind:class="{'cur': priceChecked == index}">{{price.startPrice}} - {{price.endPrice}}</a>
@@ -43,13 +43,13 @@
               <div class="accessory-list col-4">
                 <ul>
 
-                  <li v-for="item in goodsList">
+                  <li v-for="item in products">
                     <div class="pic">
-                      <a href="#"><img v-lazy="`static/${item.productImg}`" alt=""></a>
+                      <a href="#"><img v-lazy="`static/${item.productImage}`" alt=""></a>
                     </div>
                     <div class="main">
                       <div class="name">{{item.productName}}</div>
-                      <div class="price">{{item.productPrice}}</div>
+                      <div class="price">{{item.salePrice}}</div>
                       <div class="btn-area">
                         <a href="javascript:;" class="btn btn--m">加入购物车</a>
                       </div>
@@ -105,6 +105,10 @@
                     </div>
                   </li>-->
                 </ul>
+
+                <p v-show="count" class="text-right">总计：<b>{{count}}</b>个商品</p>
+                <pagination v-show="pages" v-bind:currentPage="currentPage" v-bind:getProducts="getProducts" v-bind:pageSize="pageSize" v-bind:priceRange="priceChecked" v-bind:sortByPrice="sortByPrice" v-bind:pages="pages"></pagination>
+
               </div>
             </div>
           </div>
@@ -116,17 +120,22 @@
 </template>
 
 <script>
-    import './../assets/css/base.css'
-    import './../assets/css/product.css'
     import NavHeader from '@/components/NavHeader'
     import NavFooter from '@/components/NavFooter'
     import NavBread from '@/components/NavBread'
+    import Pagination from '@/components/Pagination'
     import axios from 'axios'
     export default {
-        name: "GoodsList",
+        name: "Products",
         data() {
           return {
-            goodsList: [],
+            currentPage: 1,
+            sortByPrice: 0,
+            pageSize: 2,
+            count: 0,
+            sortByPrice: 0,
+            pages: 0,
+            products: [],
             priceFilter: [
               {
                 startPrice: '0.00',
@@ -139,9 +148,13 @@
               {
                 startPrice: '1000.00',
                 endPrice: '2000.00'
+              },
+              {
+                startPrice: '2000.00',
+                endPrice: '4000.00'
               }
             ],
-            priceChecked: 'all',
+            priceChecked: -1,
             filterBy: false,
             overLayFlag: false
           };
@@ -149,16 +162,23 @@
         components: {
           NavHeader,
           NavFooter,
-          NavBread
+          NavBread,
+          Pagination
         },
         mounted() {
-          this.getGoodsList();
+          this.getProducts(this.pageSize, this.currentPage, this.priceChecked, this.sortByPrice);
         },
         methods: {
-          getGoodsList() {
-            axios.get('/goods').then((result) => {
-              var res = result.data;
-              this.goodsList = res.result;
+          getProducts(pageSize, pageNum, priceRange, sortByPrice) {
+            axios.get(`/products/select?pageSize=${pageSize}&pageNum=${pageNum}&priceRange=${priceRange}&sortByPrice=${sortByPrice}`).then((obj) => {
+              var data = obj.data;
+              if(data.code == 0){
+                this.count = data.result.count;
+                this.pages = data.result.pages;
+                this.products = data.result.products;
+              }else{
+                alert(data.msg);
+              }
             });
           },
           showFilterPop() {
@@ -166,18 +186,40 @@
             this.overLayFlag = true;
           },
           setPriceFilter(index) {
-            this.priceChecked = index,
-            this.filterBy = false;
-            this.overLayFlag = false;
+            if(this.priceChecked == index){
+
+            }else{
+              this.priceChecked = index;
+              this.currentPage = 1;
+              this.getProducts(this.pageSize, this.currentPage, this.priceChecked, this.sortByPrice);
+            }
+            this.closePop();
           },
           closePop() {
             this.filterBy = false;
             this.overLayFlag = false;
-          }
+          },
+          sortProducts(num){
+            if(num == 0){
+              this.sortByPrice = num;
+            }else{
+              if(this.sortByPrice == 0){
+                this.sortByPrice = 1;
+              }else{
+                this.sortByPrice = this.sortByPrice * -1;
+              }
+            }
+            this.currentPage = 1;
+            this.getProducts(this.pageSize, this.currentPage, this.priceChecked, this.sortByPrice);
+          },
         }
     }
 </script>
 
+<style>
+  @import './../assets/css/base.css';
+  @import './../assets/css/product.css';
+</style>
 <style scoped>
 
 </style>

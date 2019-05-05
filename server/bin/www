@@ -7,6 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('server:server');
 var http = require('http');
+var moogoose = require('mongoose');
 
 /**
  * Get port from environment and store in Express.
@@ -24,10 +25,16 @@ var server = http.createServer(app);
 /**
  * Listen on provided port, on all network interfaces.
  */
-
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
+moogoose.connect('mongodb://localhost:27017/dumall',{useNewUrlParser: true},function(err){
+  if(err){
+    console.log('数据库连接失败！');
+  }else{
+    console.log('数据库连接成功！');
+    server.listen(port);
+    server.on('error', onError);
+    server.on('listening', onListening);
+  }
+});
 
 /**
  * Normalize a port into a number, string, or false.

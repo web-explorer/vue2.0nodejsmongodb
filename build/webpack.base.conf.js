@@ -31,6 +31,21 @@ module.exports = {
   },
   module: {
     rules: [
+
+      {
+        test: /\.less$/,
+        loader: "style-loader!css-loader!less-loader",
+      },
+
+      /*{
+        test:/\.css$/,
+        loader:'style-loader!css-loader!stylus-loader',
+        include: [
+          /src/,//在src目录下的css需要编译
+          '/node_modules/bootstrap/dist/css'//增加swiper目录
+        ]
+      },*/
+
       {
         test: /\.vue$/,
         loader: 'vue-loader',
