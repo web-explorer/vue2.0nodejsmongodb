@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var mongoose = require('mongoose');
 var Product = require('./../models/Product');
+var User = require('./../models/User');
 
 //定义返回数据的格式
 var responseData;
@@ -104,7 +105,40 @@ router.get('/select', function(req, res) {
 * 把商品添加到购物车
 * */
 router.post('/addCart', (req, res) => {
+  let userName = req.body.userName;
+  let productId = req.body.productId;
+  let user;
 
+  User.findOne({userName: userName}).then(function(userDoc){
+    user = userDoc;
+    for(var i=0; i<user.cartList.length; i++){
+      if(user.cartList[i].productId == productId){
+        let num = Number(user.cartList[i].productNum);
+        num++;
+        cartList[i].productNum = num;
+        responseData.result = num;
+        user.save();
+        res.json(responseData);
+        break;
+      }
+    }
+    if(i == user.cartList.length){
+      return Product.findOne({productId: productId});
+    }
+  }).then(function(product){
+    product.productNum = '1';
+    responseData.result = 1;
+    product.checked = '1';console.log(product);
+    user.cartList.push(product);
+    return user.save();
+  }).then(function(newUser){
+    responseData.msg = '添加成功！';
+    res.json(responseData);
+  }).catch(function(err){
+    responseData.code = 1;
+    responseData.msg = err;
+    res.json(responseData);
+  });
 });
 
 module.exports = router;

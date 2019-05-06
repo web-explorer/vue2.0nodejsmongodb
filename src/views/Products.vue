@@ -1,6 +1,6 @@
 <template>
     <div>
-      <nav-header></nav-header>
+      <nav-header ref="navHeader"></nav-header>
       <nav-bread>
         <span>Goods</span>
       </nav-bread>
@@ -51,7 +51,7 @@
                       <div class="name">{{item.productName}}</div>
                       <div class="price">{{item.salePrice}}</div>
                       <div class="btn-area">
-                        <a href="javascript:;" class="btn btn--m">加入购物车</a>
+                        <a href="javascript:;" class="btn btn--m" @click="addCart(item.productId)">加入购物车</a>
                       </div>
                     </div>
                   </li>
@@ -212,6 +212,16 @@
             this.currentPage = 1;
             this.getProducts(this.pageSize, this.currentPage, this.priceChecked, this.sortByPrice);
           },
+          addCart(str){
+            axios.post('products/addCart', {userName: this.$refs.navHeader.nickname, productId: str}).then(function(response){
+              let res = response.data;
+              if(res.code == 0){
+                alert(`加入购物车成功！购物车中该商品的数量为：${res.result}`);
+              }else{
+                alert(res.msg);
+              }
+            });
+          }
         }
     }
 </script>

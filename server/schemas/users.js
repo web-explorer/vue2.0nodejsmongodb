@@ -12,10 +12,12 @@ module.exports = new mongoose.Schema({
   orderList: Array,
   //购物车
   cartList: [{
+    _id: Object,
     productId: String,
-    ProductName: String,
+    productName: String,
     salePrice: Number,
     productImage: String,
+    productUrl: String,
     checked: Boolean,
     productNum: Number
   }],
