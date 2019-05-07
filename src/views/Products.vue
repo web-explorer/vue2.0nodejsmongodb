@@ -2,7 +2,7 @@
     <div>
       <nav-header ref="navHeader"></nav-header>
       <nav-bread>
-        <span>Goods</span>
+        <span>Products</span>
       </nav-bread>
       <div class="accessory-result-page accessory-page">
         <div class="container">
@@ -115,11 +115,25 @@
         </div>
       </div>
       <div class="md-overlay" v-show="overLayFlag" @click="closePop"></div>
+      <modal v-bind:mdShow="addCartFail" v-bind:mark="'addCartFail'" @close="close(mark)">
+        <p slot="message">请先登录，否则无法添加到购物车中！</p>
+        <div slot="btnGroup">
+          <a href="javascript:;" class="btn btn--m" @click="close('addCartFail')">关闭</a>
+        </div>
+      </modal>
+      <modal v-bind:mdShow="addCartSucc" v-bind:mark="'addCartSucc'" @close="close(mark)">
+        <p slot="message">加入购物车成功！购物车中该商品的数量为：{{currProductNum}}</p>
+        <div slot="btnGroup">
+          <a href="javascript:;" class="btn btn--m" @click="close('addCartSucc')">继续购物</a>
+          <router-link class="btn btn--m" to="/cart">查看购物车</router-link>
+        </div>
+      </modal>
       <nav-footer></nav-footer>
     </div>
 </template>
 
 <script>
+    import Modal from '@/components/Modal'
     import NavHeader from '@/components/NavHeader'
     import NavFooter from '@/components/NavFooter'
     import NavBread from '@/components/NavBread'
@@ -129,6 +143,9 @@
         name: "Products",
         data() {
           return {
+            currProductNum: 0,
+            addCartFail: false,
+            addCartSucc: false,
             currentPage: 1,
             sortByPrice: 0,
             pageSize: 2,
@@ -163,7 +180,8 @@
           NavHeader,
           NavFooter,
           NavBread,
-          Pagination
+          Pagination,
+          Modal
         },
         mounted() {
           this.getProducts(this.pageSize, this.currentPage, this.priceChecked, this.sortByPrice);
@@ -171,7 +189,7 @@
         methods: {
           getProducts(pageSize, pageNum, priceRange, sortByPrice) {
             axios.get(`/products/select?pageSize=${pageSize}&pageNum=${pageNum}&priceRange=${priceRange}&sortByPrice=${sortByPrice}`).then((obj) => {
-              var data = obj.data;
+              let data = obj.data;
               if(data.code == 0){
                 this.count = data.result.count;
                 this.pages = data.result.pages;
@@ -213,14 +231,27 @@
             this.getProducts(this.pageSize, this.currentPage, this.priceChecked, this.sortByPrice);
           },
           addCart(str){
+            let that = this;
             axios.post('products/addCart', {userName: this.$refs.navHeader.nickname, productId: str}).then(function(response){
               let res = response.data;
               if(res.code == 0){
-                alert(`加入购物车成功！购物车中该商品的数量为：${res.result}`);
+                that.currProductNum = res.result;
+                that.addCartSucc = true;
               }else{
-                alert(res.msg);
+                that.addCartFail = true;
               }
             });
+          },
+          close(mark) {
+            switch (mark) {
+              case 'addCartFail':
+                this.addCartFail = false;
+                break;
+              case 'addCartSucc':
+                this.addCartSucc = false;
+                this.currProductNum = 0;
+                break;
+            }
           }
         }
     }

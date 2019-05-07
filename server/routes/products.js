@@ -61,34 +61,6 @@ router.get('/select', function(req, res) {
   responseData.result.pageSize = pageSize;
   responseData.result.pageNum = pageNum;
 
-/*  mongoose.connect('mongodb://localhost:27017/dumall', {useNewUrlParser: true}, function(err){
-    /!*if(err){
-      console.log('数据库连接失败！');
-    }else{
-      console.log('数据库连接成功！');
-
-      Product.count().where(where).then(function(count){
-        responseData.result.count = count;
-        responseData.result.pages = Math.ceil(count / pageSize);
-        return Product.find().where(where).sort({salePrice: sortByPrice}).skip(skip).limit(pageSize);
-      }).then(function(products){
-        responseData.result.products = products;
-        responseData.msg = '成功';
-        res.json(responseData);
-      });
-
-    }*!/
-    /!*Product.count().where(where).then(function(count){
-      responseData.result.count = count;
-      responseData.result.pages = Math.ceil(count / pageSize);
-      return Product.find().where(where).sort({salePrice: sortByPrice}).skip(skip).limit(pageSize);
-    }).then(function(products){
-      responseData.result.products = products;
-      responseData.msg = '成功';
-      res.json(responseData);
-    });*!/
-  });*/
-
   Product.count().where(where).then(function(count){
     responseData.result.count = count;
     responseData.result.pages = Math.ceil(count / pageSize);
@@ -115,10 +87,11 @@ router.post('/addCart', (req, res) => {
       if(user.cartList[i].productId == productId){
         let num = Number(user.cartList[i].productNum);
         num++;
-        cartList[i].productNum = num;
+        user.cartList[i].productNum = num;console.log(num);
         responseData.result = num;
         user.save();
         res.json(responseData);
+        return Promise.reject();
         break;
       }
     }
@@ -126,10 +99,10 @@ router.post('/addCart', (req, res) => {
       return Product.findOne({productId: productId});
     }
   }).then(function(product){
-    product.productNum = '1';
     responseData.result = 1;
-    product.checked = '1';console.log(product);
     user.cartList.push(product);
+    user.cartList[user.cartList.length - 1].productNum = 1;
+    user.cartList[user.cartList.length - 1].checked= true;
     return user.save();
   }).then(function(newUser){
     responseData.msg = '添加成功！';

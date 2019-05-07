@@ -74,4 +74,33 @@ router.post('/checkLogin', (req, res) => {
   res.json(responseData);
 });
 
+/*
+* 获取购物车中的商品
+* */
+router.get('/cart',function (req, res) {
+  let userName = req.cookies.userInfo;
+  User.findOne({
+    userName: userName
+  }).then(function(user){
+    responseData.msg = '成功！';
+    responseData.result = user.cartList;
+    res.json(responseData);
+  });
+});
+
+/*
+* 删除购物车里的某个商品
+* */
+router.post('/cart/delete').then((req, res) => {
+  let userName = req.cookies.userInfo;
+  let productId = req.productId;
+  return User.update({userName: userName}, {$pull: {cartList: productId}});
+  }).then((newUser) => {
+  responseData.msg = '删除成功！';
+  res.json(responseData);
+}).catch((err) => {
+  responseData.code = 1;
+  responseData.msg = err;
+});
+
 module.exports = router;
