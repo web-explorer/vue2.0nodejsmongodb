@@ -91,16 +91,121 @@ router.get('/cart',function (req, res) {
 /*
 * 删除购物车里的某个商品
 * */
-router.post('/cart/delete').then((req, res) => {
+router.post('/cart/delete', (req, res) => {
   let userName = req.cookies.userInfo;
-  let productId = req.productId;
-  return User.update({userName: userName}, {$pull: {cartList: productId}});
+  let productId = req.body.productId;
+  User.update({userName: userName}, {'$pull': {cartList: {productId: productId}}}).then((newUser) => {
+    responseData.msg = '删除成功！';
+    res.json(responseData);
+  }).catch((err) => {
+    responseData.code = 1;
+    responseData.msg = err;
+  });
+});
+
+/*
+* 切换购物车中商品的选中状态
+* */
+router.post('/cart/check', (req, res) => {
+  let userName = req.cookies.userInfo;
+  let productId = req.body.productId;
+  let checked = req.body.checked;
+
+  /*User.findOne({userName: userName}).then((user) => {
+    for(let i=0; i<user.cartList.length; i++){
+      if(user.cartList[i].productId == productId){console.log(user.cartList[i].checked);
+        user.cartList[i].checked = !user.cartList[i].checked;
+        break;
+      }
+    }
+    return user.save();*/
+
+    User.update({
+      userName: userName,
+      'cartList.productId': productId
+    }, {
+      'cartList.$.checked': checked
+    }).then((newUser) => {
+    responseData.msg = '更新商品的选中状态成功！';
+    res.json(responseData);
+  }).catch((err) => {
+    responseData.code = 1;
+    responseData.msg = err.message;
+    res.json(responseData);
+  });
+
+});
+
+/*
+* 切换所有商品的选中状态
+* */
+router.post('/cart/setAll', (req, res) => {
+  let userName = req.cookies.userInfo;console.log(userName);
+  let checked = req.body.checked;console.log(checked);
+
+  /*User.findOne({userName: userName}).then((user) => {
+    for(let i=0; i<user.cartList.length; i++){
+      user.cartList[i].checked = checked;
+    }
+    return user.save();
   }).then((newUser) => {
-  responseData.msg = '删除成功！';
-  res.json(responseData);
-}).catch((err) => {
-  responseData.code = 1;
-  responseData.msg = err;
+    responseData.msg = '修改商品的状态成功！';
+    res.json(responseData);
+  });*/
+
+  User.update({userName: userName}, {$set: {'cartList.$.checked': checked}}).then((newUsers) => {
+    responseData.msg = '更新商品的选中状态成功！';
+    res.json(responseData);
+  }).catch((err) => {
+    responseData.code = 1;
+    responseData.msg = err.message;
+    res.json(responseData);
+  });
+
+});
+
+/*
+* 购物车中的某个商品数量-1
+* */
+router.post('/cart/countMinus',(req, res) => {
+  let userName = req.cookies.userInfo;
+  let productId = req.body.productId;
+
+  User.findOne({userName: userName}).then((user) => {
+    for(let i=0; i<user.cartList.length; i++){
+      if(user.cartList[i].productId == productId){
+        user.cartList[i].productNum--;
+        break;
+      }
+    }
+    return user.save();
+  }).then((newUser) => {
+    responseData.msg = '修改商品的数量成功！';
+    res.json(responseData);
+  });
+
+});
+
+/*
+* 购物车中的某个商品数量+1
+* */
+router.post('/cart/countAdd',(req, res) => {
+  let userName = req.cookies.userInfo;
+  let productId = req.body.productId;
+
+  User.findOne({userName: userName}).then((user) => {
+    for(let i=0; i<user.cartList.length; i++){
+      if(user.cartList[i].productId == productId){
+        user.cartList[i].productNum++;
+        break;
+      }
+    }
+    return user.save();
+  }).then((newUser) => {
+    responseData.msg = '修改商品的数量成功！';
+    res.json(responseData);
+  });
+
 });
 
 module.exports = router;

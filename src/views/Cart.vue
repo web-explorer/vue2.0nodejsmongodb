@@ -62,7 +62,7 @@
               <li v-for="(item, index) in cartList">
                 <div class="cart-tab-1">
                   <div class="cart-item-check">
-                    <a href="javascipt:;" class="checkbox-btn item-check-btn" v-bind:class="{'check': item.checked == true}">
+                    <a href="javascipt:;" class="checkbox-btn item-check-btn" v-bind:class="{'check': item.checked == true}" @click="check(item.productId, index)">
                       <svg class="icon icon-ok">
                         <use xlink:href="#icon-ok"></use>
                       </svg>
@@ -82,9 +82,9 @@
                   <div class="item-quantity">
                     <div class="select-self select-self-open">
                       <div class="select-self-area">
-                        <a class="input-sub">-</a>
+                        <a class="input-sub" @click="countMinus(item.productId, index)">-</a>
                         <span class="select-ipt">{{item.productNum}}</span>
-                        <a class="input-add">+</a>
+                        <a class="input-add" @click="countAdd(item.productId, index)">+</a>
                       </div>
                     </div>
                   </div>
@@ -94,7 +94,7 @@
                 </div>
                 <div class="cart-tab-5">
                   <div class="cart-item-opration">
-                    <a href="javascript:;" class="item-edit-btn" @click="emitDel(item.productId, index)">
+                    <a href="javascript:;" class="item-edit-btn" @click="emitDel(item.productId, index,item.productName)">
                       <svg class="icon icon-del">
                         <use xlink:href="#icon-del"></use>
                       </svg>
@@ -109,8 +109,8 @@
           <div class="cart-foot-inner">
             <div class="cart-foot-l">
               <div class="item-all-check">
-                <a href="javascipt:;">
-                  <span class="checkbox-btn item-check-btn">
+                <a href="javascipt:;" @click="setAll">
+                  <span class="checkbox-btn item-check-btn" v-bind:class="{check: allchecked}">
                       <svg class="icon icon-ok"><use xlink:href="#icon-ok"/></svg>
                   </span>
                   <span>Select all</span>
@@ -129,11 +129,17 @@
         </div>
       </div>
     </div>
-    <modal v-bind:mdShow="delComfirm" v-bind:mark="'delComfirm'" @close="close(mark)">
-      <p slot="message">确定删除{{currProductNum}}吗？</p>
+    <modal v-bind:mdShow="delComfirm" v-bind:mark="'delComfirm'" @close="close">
+      <p slot="message">确定删除{{currDelProductName}}吗？</p>
       <div slot="btnGroup">
         <a href="javascript:;" class="btn btn--m" @click="del">确定</a>
         <a href="javascript:;" class="btn btn--m" @click="close('delComfirm')">取消</a>
+      </div>
+    </modal>
+    <modal v-bind:mdShow="minusAlert" v-bind:mark="'minusAlert'" @close="close">
+      <p slot="message">购物车中商品的数量不能小于1！</p>
+      <div slot="btnGroup">
+        <a href="javascript:;" class="btn btn--m" @click="close('minusAlert')">取消</a>
       </div>
     </modal>
     <nav-footer></nav-footer>
@@ -151,6 +157,9 @@
         name: "Cart",
         data() {
           return {
+            minusAlert: false,
+            allchecked: true,
+            currDelProductName: '',
             currDelProductIndex: -1,
             currDelProduct: '',
             delComfirm: false,
@@ -175,6 +184,16 @@
               if(res.code == 0){
                 this.cartList = res.result;
                 this.cacuItemTotal();
+
+                let bol = true;
+                for(let i=0; i<this.cartList.length; i++){
+                  bol = bol && this.cartList[i].checked;
+                  if(!bol){
+                    this.allchecked = false;
+                    break;
+                  }
+                }
+
               }
             });
           },
@@ -191,9 +210,10 @@
               this.itemTotal = sum;
             }
           },
-          emitDel(productId, index) {
+          emitDel(productId, index, productName) {
             this.currDelProduct = productId;
             this.currDelProductIndex = index;
+            this.currDelProductName = productName;
             this.delComfirm = true;
           },
           del() {
@@ -201,6 +221,7 @@
               let res = response.data;
               if(res.code == 0){
                 this.cartList.splice(this.currDelProductIndex, 1);
+                this.cacuItemTotal();
                 this.close('delComfirm');
               }
             }));
@@ -211,8 +232,66 @@
               this.delComfirm = false;
               this.currDelProductIndex = -1;
               this.currDelProduct = '';
+              this.currDelProductName = '';
               break;
+            case 'minusAlert':
+              this.minusAlert = false;
           }
+        },
+        check(productId, index) {
+          axios.post('/users/cart/check', {productId: productId, checked: !this.cartList[index].checked}).then((response) => {
+            let res = response.data;
+            if(res.code ==0){
+              this.cartList[index].checked = !this.cartList[index].checked;
+              if(this.cartList[index].checked){
+                for(let i=0; i<this.cartList.length; i++){
+                  this.allchecked= this.cartList[index].checked && this.cartList[i].checked;
+                  if(!this.allchecked){
+                    break;
+                  }
+                }
+              }else{
+                this.allchecked = false;
+              }
+              this.cacuItemTotal();
+            }
+          });
+        },
+        setAll() {
+            axios.post('users/cart/setAll', {checked: !this.allchecked}).then((response) => {
+              let res = response.data;
+              if(res.code ==0){
+                this.allchecked = !this.allchecked;
+                for(let i=0; i<this.cartList.length; i++){
+                  this.cartList[i].checked = this.allchecked;
+                }
+                this.cacuItemTotal();
+              }
+            });
+        },
+        countMinus(productId, index) {
+
+            if(this.cartList[index].productNum == 1){
+              this.minusAlert = true;
+              return;
+            }
+
+            axios.post('users/cart/countMinus', {productId: productId}).then((response) => {
+              let res = response.data;
+              if(res.code ==0){
+                this.cartList[index].productNum--;
+                this.cacuItemTotal();
+              }
+            });
+        },
+        countAdd(productId, index) {
+          axios.post('users/cart/countAdd', {productId: productId}).then((response) => {
+            let res = response.data;
+            if(res.code ==0){
+              this.cartList[index].productNum++;
+              this.cacuItemTotal();
+            }
+          });
         }
       }
     }

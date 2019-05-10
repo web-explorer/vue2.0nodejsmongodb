@@ -45,7 +45,8 @@
 
                   <li v-for="item in products">
                     <div class="pic">
-                      <a href="#"><img v-lazy="`static/${item.productImage}`" alt=""></a>
+<!--                      <a href="#"><img v-lazy="'static/' + item.productImage" alt=""></a>-->
+                      <a href="#"><img :src="'static/' + item.productImage" alt=""></a>
                     </div>
                     <div class="main">
                       <div class="name">{{item.productName}}</div>
@@ -115,13 +116,13 @@
         </div>
       </div>
       <div class="md-overlay" v-show="overLayFlag" @click="closePop"></div>
-      <modal v-bind:mdShow="addCartFail" v-bind:mark="'addCartFail'" @close="close(mark)">
+      <modal v-bind:mdShow="addCartFail" v-bind:mark="'addCartFail'" @close="close">
         <p slot="message">请先登录，否则无法添加到购物车中！</p>
         <div slot="btnGroup">
           <a href="javascript:;" class="btn btn--m" @click="close('addCartFail')">关闭</a>
         </div>
       </modal>
-      <modal v-bind:mdShow="addCartSucc" v-bind:mark="'addCartSucc'" @close="close(mark)">
+      <modal v-bind:mdShow="addCartSucc" v-bind:mark="'addCartSucc'" @close="close">
         <p slot="message">加入购物车成功！购物车中该商品的数量为：{{currProductNum}}</p>
         <div slot="btnGroup">
           <a href="javascript:;" class="btn btn--m" @click="close('addCartSucc')">继续购物</a>
@@ -148,7 +149,7 @@
             addCartSucc: false,
             currentPage: 1,
             sortByPrice: 0,
-            pageSize: 2,
+            pageSize: 3,
             count: 0,
             sortByPrice: 0,
             pages: 0,
