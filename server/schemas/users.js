@@ -12,7 +12,7 @@ module.exports = new mongoose.Schema({
   orderList: Array,
   //购物车
   cartList: [{
-    _id: Object,
+    _id: ObjectId,
     productId: String,
     productName: String,
     salePrice: Number,
@@ -21,5 +21,37 @@ module.exports = new mongoose.Schema({
     checked: Boolean,
     productNum: Number
   }],
-  addressList: Array
+  addressList: [{
+    addressId: String,
+    userName: String,
+    streetName: String,
+    postCode: String,
+    tel: String,
+    isDefault: Boolean
+  }],
+  orderList: [{
+    _id: Object,
+    addressInfo:{
+      addressId: String,
+      userName: String,
+      streetName: String,
+      postCode: String,
+      tel: String,
+      isDefault: Boolean
+    },
+    orderId: String,
+    orderTotal: Number,
+    orderStatus: Number,
+    createDate: String,
+    goodsList:[{
+      _id: Object,
+      productId: String,
+      productName: String,
+      salePrice: Number,
+      productImage: String,
+      productUrl: String,
+      checked: Boolean,
+      productNum: Number
+    }]
+  }]
 });

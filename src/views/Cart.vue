@@ -76,7 +76,7 @@
                   </div>
                 </div>
                 <div class="cart-tab-2">
-                  <div class="item-price">{{item.salePrice}}</div>
+                  <div class="item-price">{{item.salePrice | currency('￥')}}</div>
                 </div>
                 <div class="cart-tab-3">
                   <div class="item-quantity">
@@ -90,7 +90,7 @@
                   </div>
                 </div>
                 <div class="cart-tab-4">
-                  <div class="item-price-total">{{item.salePrice * item.productNum}}</div>
+                  <div class="item-price-total">{{(item.salePrice * item.productNum) | currency('￥')}}</div>
                 </div>
                 <div class="cart-tab-5">
                   <div class="cart-item-opration">
@@ -119,10 +119,10 @@
             </div>
             <div class="cart-foot-r">
               <div class="item-total">
-                Item total: <span class="total-price">{{itemTotal}}</span>
+                Item total: <span class="total-price">{{itemTotal | currency('￥')}}</span>
               </div>
               <div class="btn-wrap">
-                <a class="btn btn--red">Checkout</a>
+                <a class="btn btn--red" :class="{'btn--dis': itemTotal == 0}" @click="checkout">Checkout</a>
               </div>
             </div>
           </div>
@@ -151,28 +151,51 @@
     import NavHeader from '@/components/NavHeader'
     import NavFooter from '@/components/NavFooter'
     import NavBread from '@/components/NavBread'
-    import Pagination from '@/components/Pagination'
     import axios from 'axios'
+    // import {currency} from './../util/currency'
     export default {
         name: "Cart",
         data() {
           return {
             minusAlert: false,
-            allchecked: true,
+            /*allchecked: true,*/
             currDelProductName: '',
             currDelProductIndex: -1,
             currDelProduct: '',
             delComfirm: false,
-            itemTotal: 0,
+            // itemTotal: 0,
             cartList: []
           };
         },
+      filters: {
+          // currency: currency
+      },
+      computed: {
+          allchecked() {
+            let bol = true;
+            for(let i=0; i<this.cartList.length; i++){
+              bol = bol && this.cartList[i].checked;
+              if(!bol){
+                return bol;
+              }
+            }
+            return bol;
+          },
+          itemTotal() {
+            let sum = 0;
+            for(let i=0; i<this.cartList.length; i++){
+              if(this.cartList[i].checked){
+                sum += this.cartList[i].salePrice * this.cartList[i].productNum;
+              }
+            }
+            return sum;
+          }
+      },
         components: {
           Modal,
           NavHeader,
           NavFooter,
-          NavBread,
-          Pagination
+          NavBread
         },
       mounted() {
           this.getCart();
@@ -183,21 +206,21 @@
               let res = response.data;
               if(res.code == 0){
                 this.cartList = res.result;
-                this.cacuItemTotal();
+                // this.cacuItemTotal();
 
-                let bol = true;
+                /*let bol = true;
                 for(let i=0; i<this.cartList.length; i++){
                   bol = bol && this.cartList[i].checked;
                   if(!bol){
                     this.allchecked = false;
                     break;
                   }
-                }
+                }*/
 
               }
             });
           },
-          cacuItemTotal() {
+          /*cacuItemTotal() {
             let sum = 0;
             for(let i=0; i<this.cartList.length; i++){
               if(this.cartList[i].checked){
@@ -209,7 +232,7 @@
             }else{
               this.itemTotal = sum;
             }
-          },
+          },*/
           emitDel(productId, index, productName) {
             this.currDelProduct = productId;
             this.currDelProductIndex = index;
@@ -221,7 +244,7 @@
               let res = response.data;
               if(res.code == 0){
                 this.cartList.splice(this.currDelProductIndex, 1);
-                this.cacuItemTotal();
+                // this.cacuItemTotal();
                 this.close('delComfirm');
               }
             }));
@@ -236,6 +259,7 @@
               break;
             case 'minusAlert':
               this.minusAlert = false;
+              break;
           }
         },
         check(productId, index) {
@@ -243,7 +267,7 @@
             let res = response.data;
             if(res.code ==0){
               this.cartList[index].checked = !this.cartList[index].checked;
-              if(this.cartList[index].checked){
+              /*if(this.cartList[index].checked){
                 for(let i=0; i<this.cartList.length; i++){
                   this.allchecked= this.cartList[index].checked && this.cartList[i].checked;
                   if(!this.allchecked){
@@ -252,8 +276,8 @@
                 }
               }else{
                 this.allchecked = false;
-              }
-              this.cacuItemTotal();
+              }*/
+              /*this.cacuItemTotal();*/
             }
           });
         },
@@ -261,11 +285,11 @@
             axios.post('users/cart/setAll', {checked: !this.allchecked}).then((response) => {
               let res = response.data;
               if(res.code ==0){
-                this.allchecked = !this.allchecked;
+                let flag = !this.allchecked;
                 for(let i=0; i<this.cartList.length; i++){
-                  this.cartList[i].checked = this.allchecked;
+                  this.cartList[i].checked = flag;
                 }
-                this.cacuItemTotal();
+               /* this.cacuItemTotal();*/
               }
             });
         },
@@ -280,7 +304,7 @@
               let res = response.data;
               if(res.code ==0){
                 this.cartList[index].productNum--;
-                this.cacuItemTotal();
+/*                this.cacuItemTotal();*/
               }
             });
         },
@@ -289,9 +313,18 @@
             let res = response.data;
             if(res.code ==0){
               this.cartList[index].productNum++;
-              this.cacuItemTotal();
+/*              this.cacuItemTotal();*/
             }
           });
+        },
+        checkout() {
+            if(this.itemTotal){
+              this.$router.push({
+                path: '/address'
+              });
+            }else{
+
+            }
         }
       }
     }

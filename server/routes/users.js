@@ -3,6 +3,11 @@ var router = express.Router();
 var mongoose = require('mongoose');
 var User = require('./../models/User');
 
+/*
+* 引入辅助js
+* */
+require('./../util/util');
+
 var responseData;
 router.use(function(req, res, next){
   responseData = {
@@ -143,22 +148,13 @@ router.post('/cart/setAll', (req, res) => {
   let userName = req.cookies.userInfo;console.log(userName);
   let checked = req.body.checked;console.log(checked);
 
-  /*User.findOne({userName: userName}).then((user) => {
+  User.findOne({userName: userName}).then((user) => {
     for(let i=0; i<user.cartList.length; i++){
       user.cartList[i].checked = checked;
     }
     return user.save();
   }).then((newUser) => {
     responseData.msg = '修改商品的状态成功！';
-    res.json(responseData);
-  });*/
-
-  User.update({userName: userName}, {$set: {'cartList.$.checked': checked}}).then((newUsers) => {
-    responseData.msg = '更新商品的选中状态成功！';
-    res.json(responseData);
-  }).catch((err) => {
-    responseData.code = 1;
-    responseData.msg = err.message;
     res.json(responseData);
   });
 
@@ -203,6 +199,138 @@ router.post('/cart/countAdd',(req, res) => {
     return user.save();
   }).then((newUser) => {
     responseData.msg = '修改商品的数量成功！';
+    res.json(responseData);
+  });
+
+});
+
+/*
+* 获取地址
+* */
+router.get('/getAddressList', function(req, res, next){
+  let userName = req.cookies.userInfo;
+
+  User.findOne({userName: userName}).then(function(user){
+    if(user){
+      responseData.msg = '成功！';
+      responseData.result = user.addressList;
+      res.json(responseData);
+    }
+  });
+
+});
+
+/*
+* 设置默认地址
+* */
+router.post('/setDefaultAddress', (req, res) => {
+  let userName = req.cookies.userInfo;
+  let index = req.body.index;
+
+  User.findOne({userName: userName}).then((user) => {
+    let objectiveAddress = user.addressList.splice(index, 1)[0];
+    objectiveAddress.isDefault = true;
+    let originalAddress = user.addressList.shift();
+    originalAddress.isDefault = false;
+
+    user.addressList.unshift(objectiveAddress);
+    user.addressList.push(originalAddress);
+    return user.save();
+  }).then((newUser) => {
+    responseData.msg = '成功！';
+    res.json(responseData);
+  }).catch((err) => {
+    responseData.code = 1;
+    responseData.msg = err.message;
+    res.json(responseData);
+  });
+
+});
+
+/*
+* 删除地址
+* */
+router.post('/deleteAddress', (req, res) => {
+  let userName = req.cookies.userInfo;
+  let index = req.body.index;
+
+  User.findOne({userName: userName}).then((user) => {
+    if(index == 0){
+      user.addressList.shift();
+      user.addressList[0].isDefault = true;
+    }else{
+      user.addressList.splice(index, 1);
+    }
+    return user.save();
+  }).then((newUser) => {
+    responseData.msg = '成功！';
+    res.json(responseData);
+  });
+
+});
+
+/*
+* 获得购物车中被选中的商品
+* */
+router.get('/cart/checked', (req, res) => {
+  let userName = req.cookies.userInfo;
+
+  User.findOne({userName: userName}).then((user) => {
+
+    responseData.result = [];
+    for(let i=0; i<user.cartList.length; i++){
+      if(user.cartList[i].checked){
+        responseData.result.push(user.cartList[i]);
+      }
+    }
+    responseData.msg = '成功！';
+    res.json(responseData);
+
+  });
+
+});
+
+/*
+* 生成订单
+* */
+router.post('/payMent', (req, res) => {
+  let userName = req.cookies.userInfo;
+  let orderTotal = req.body.orderTotal;
+  let addressId = req.body.addressId;
+
+  User.findOne({userName: userName}).then((user) => {
+    let goodsList = [];
+    for(let i=user.cartList.length-1; i>-1; i--){
+      if(user.cartList[i].checked){
+        goodsList.push(user.cartList.splice(i,1)[0]);
+      }
+    }
+    let addressInfo = {};
+    for(let i=0; i<user.addressList.length; i++){
+      if(user.addressList[i].addressId == addressId){
+        addressInfo = user.addressList[i];
+        break;
+      }
+    }
+    let platform = '622';
+    let r1 = Math.floor(Math.random() * 10);
+    let r2 = Math.floor(Math.random() * 10);
+    let sysDate = new Date().Format('yyyyMMddhhmmss');console.log(sysDate);
+    let createDate = new Date().Format('yyyy-MM-dd hh:mm:ss');
+    let orderId = platform + r1 + sysDate + r2;
+    let order = {
+      orderId: orderId,
+      orderTotal: orderTotal,
+      addressInfo: addressInfo,
+      goodsList: goodsList,
+      orderStatus: 1,
+      createDate: createDate
+    };console.log(order);
+    user.orderList.push(order);
+    return user.save();
+  }).then((newUser) => {
+    responseData.result = {orderId: newUser.orderList[newUser.orderList.length-1].orderId};
+    responseData.msg = '成功！';
     res.json(responseData);
   });
 
