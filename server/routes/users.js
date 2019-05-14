@@ -336,4 +336,40 @@ router.post('/payMent', (req, res) => {
 
 });
 
+/*
+* 根据订单id获取订单详情
+* */
+router.get('/orderDetail', (req, res) => {
+  let userName = req.cookies.userInfo;
+  let orderId = req.query.orderId;
+
+  User.findOne({userName: userName}).then((user) => {
+    for(let i=0; i<user.orderList.length; i++){
+      if(user.orderList[i].orderId == orderId){
+        responseData.result = user.orderList[i].orderTotal;
+        responseData.msg = '成功！';
+        res.json(responseData);
+      }
+    }
+  });
+});
+
+/*
+* 获取购物车中商品的总数量
+* */
+router.get('/cart/productsNum', (req, res) => {
+  let userName = req.cookies.userInfo;
+
+  User.findOne({userName: userName}).then((user) => {
+    let num = 0;
+    for(let i=0; i<user.cartList.length; i++){
+      num += user.cartList[i].productNum;
+    }
+    responseData.result = num;
+    responseData.msg = '成功！';
+    res.json(responseData);
+  });
+
+});
+
 module.exports = router;

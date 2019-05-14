@@ -19,7 +19,7 @@
           <a href="javascript:void(0)" class="navbar-link" @click="loginModalFlag = true" v-if="!nickname">Login</a>
           <a href="javascript:void(0)" class="navbar-link" @click="logout" v-else>Logout</a>
           <div class="navbar-cart-container">
-            <span class="navbar-cart-count"></span>
+            <span class="navbar-cart-count" v-if="nickname">{{cartCount}}</span>
             <a class="navbar-link navbar-cart-link" href="/#/cart">
               <svg class="navbar-cart-logo">
                 <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-cart"></use>
@@ -71,11 +71,19 @@
             userPwd: '',
             errorTip: false,
             loginModalFlag: false,
-            nickname: ''
+            // nickname: ''
           };
         },
+        computed: {
+          nickname() {
+            return this.$store.state.nickname;
+          },
+          cartCount() {
+            return this.$store.state.cartCount;
+          }
+        },
         mounted(){
-          this.checkLogin();
+          // this.checkLogin();
         },
         methods: {
           login(){
@@ -87,7 +95,8 @@
               if(res.code == 0){
                 this.errorTip = false;
                 this.loginModalFlag = false;
-                this.nickname = res.result.userName;
+                this.$store.commit('updateUserInfo', res.result.userName);
+                this.getCartProductsNum();
               }else{
                 this.errorTip = true;
               }
@@ -97,18 +106,27 @@
             axios.post('users/logout').then((response) => {
               let res = response.data;
               if(res.code == 0){
-                this.nickname = '';
+                this.$store.commit('updateUserInfo', '');
+                this.$store.commit('updateCartCount', 0);
               }
             });
           },
-          checkLogin(){
+          getCartProductsNum() {
+            axios.get('/users/cart/productsNum').then((response) => {
+              let res = response.data;
+              if(res.code == 0){
+                this.$store.commit('updateCartCount', res.result);
+              }
+            });
+          }
+          /*checkLogin(){
             axios.post('users/checkLogin').then((response) => {
               let res = response.data;
               if(res.code == 0){
                 this.nickname = res.result.userName;
               }
             });
-          }
+          }*/
         }
     }
 </script>

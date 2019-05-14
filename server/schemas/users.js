@@ -12,7 +12,7 @@ module.exports = new mongoose.Schema({
   orderList: Array,
   //购物车
   cartList: [{
-    _id: ObjectId,
+    _id: Object,
     productId: String,
     productName: String,
     salePrice: Number,

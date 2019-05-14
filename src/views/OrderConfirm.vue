@@ -179,7 +179,7 @@
         mounted() {
           this.getCheckedProducts();
         },
-        name: "orderConfirm",
+        name: "OrderConfirm",
         components: {
           NavHeader,
           NavFooter,

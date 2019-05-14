@@ -238,6 +238,7 @@
               if(res.code == 0){
                 that.currProductNum = res.result;
                 that.addCartSucc = true;
+                that.$store.commit('updateCartCount', 1);
               }else{
                 that.addCartFail = true;
               }

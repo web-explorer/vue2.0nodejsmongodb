@@ -243,6 +243,7 @@
             axios.post('users/cart/delete', {productId: this.currDelProduct}).then((response => {
               let res = response.data;
               if(res.code == 0){
+                this.$store.commit('updateCartCount', -1 * this.cartList[this.currDelProductIndex].productNum);
                 this.cartList.splice(this.currDelProductIndex, 1);
                 // this.cacuItemTotal();
                 this.close('delComfirm');
@@ -304,6 +305,7 @@
               let res = response.data;
               if(res.code ==0){
                 this.cartList[index].productNum--;
+                this.$store.commit('updateCartCount', -1);
 /*                this.cacuItemTotal();*/
               }
             });
@@ -313,6 +315,7 @@
             let res = response.data;
             if(res.code ==0){
               this.cartList[index].productNum++;
+              this.$store.commit('updateCartCount', 1);
 /*              this.cacuItemTotal();*/
             }
           });
