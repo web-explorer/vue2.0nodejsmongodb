@@ -63,6 +63,7 @@
 
 <script>
   import axios from 'axios'
+  import {mapstate} from 'vuex'
     export default {
         name: "Header",
         data(){
@@ -75,6 +76,7 @@
           };
         },
         computed: {
+          /*...mapState(['nickname', 'cartCount'])*/
           nickname() {
             return this.$store.state.nickname;
           },

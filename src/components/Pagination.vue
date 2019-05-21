@@ -1,13 +1,13 @@
 <template>
   <div class="text-center">
     <ul class="pagination">
-      <li><a href="javascript:;" @click="requestFirstPage">首页</a></li>
-      <li v-bind:class="{'disabled': currentPage == 1}"><a href="javascript:;" @click="prevPage">&laquo;<!--&laquo; ==> <<--></a></li>
-      <li v-if="pages > defaultPages && currentPage > 1 + Math.floor(defaultPages / 2)"><a href="javascript:;">...</a></li>
-      <li v-for="i in pages" v-if="(currentPage <= Math.floor(defaultPages / 2) && i <= currentPage + Math.floor(defaultPages / 2) + Math.floor(defaultPages / 2) - currentPage + 1) || ((currentPage >= pages - Math.floor(defaultPages / 2) && i >= currentPage - Math.floor(defaultPages / 2) - 2 + (pages - currentPage))) || (currentPage - Math.floor(defaultPages / 2) <= i && i <= currentPage + Math.floor(defaultPages / 2))" v-bind:class="{'active': i == currentPage}"><a href="javascript:;" @click="requertPage(i)">{{i}}</a></li>
-      <li v-if="pages > defaultPages && currentPage < pages - Math.floor(defaultPages / 2)"><a href="javascript:;">...</a></li>
-      <li v-bind:class="{'disabled': currentPage == pages}"><a href="javascript:;" @click="nextPage">&raquo;<!--&raquo; ==> >>--></a></li>
-      <li><a href="javascript:;" @click="requestLastPage">尾页</a></li>
+      <li v-bind:class="{'disabled': pages == 0}"><a href="javascript:;" @click="requestFirstPage">首页</a></li>
+      <li v-bind:class="{'disabled': pages == 0 || page == 1}"><a href="javascript:;" @click="prevPage">&laquo;<!--&laquo; ==> <<--></a></li>
+      <li v-if="pages > defaultPages && page > 1 + Math.floor(defaultPages / 2)"><a href="javascript:;">...</a></li>
+      <li v-for="i in pages" v-if="(page <= Math.floor(defaultPages / 2) && i <= page + Math.floor(defaultPages / 2) + Math.floor(defaultPages / 2) - page + 1) || ((page >= pages - Math.floor(defaultPages / 2) && i >= page - Math.floor(defaultPages / 2) - 2 + (pages - page))) || (page - Math.floor(defaultPages / 2) <= i && i <= page + Math.floor(defaultPages / 2))" v-bind:class="{'active': i == page}"><a href="javascript:;" @click="requertPage(i)">{{i}}</a></li>
+      <li v-if="pages > defaultPages && page < pages - Math.floor(defaultPages / 2)"><a href="javascript:;">...</a></li>
+      <li v-bind:class="{'disabled': pages == 0 || page == pages}"><a href="javascript:;" @click="nextPage">&raquo;<!--&raquo; ==> >>--></a></li>
+      <li v-bind:class="{'disabled': pages == 0}"><a href="javascript:;" @click="requestLastPage">尾页</a></li>
     </ul>
   </div>
 </template>
@@ -17,45 +17,45 @@
         name: "Pagination",
         data() {
           return {
-            defaultPages: 5
+            // defaultPages: 5
           };
         },
-      props: ['currentPage','getProducts','pageSize','priceRange', 'sortByPrice', 'pages'],
+      props: ['page','getProducts','pageSize','priceRange', 'sortByPrice', 'pages', 'defaultPages'],
       methods: {
         requestFirstPage() {
-          if(this.currentPage == 1){
+          if(this.page == 1){
             return;
           }
-          this.$parent.currentPage = 1;
+          this.$parent.page = 1;
           this.getProducts(this.pageSize, 1, this.priceRange, this.sortByPrice);
         },
         requestLastPage() {
-          if(this.currentPage == this.pages) {
+          if(this.page == this.pages) {
             return;
           }
-          this.$parent.currentPage = this.pages;
+          this.$parent.page = this.pages;
           this.getProducts(this.pageSize, this.pages, this.priceRange, this.sortByPrice);
         },
         requertPage(num) {
-          if(this.currentPage == num) {
+          if(this.page == num) {
             return;
           }
-          this.$parent.currentPage = num;
+          this.$parent.page = num;
           this.getProducts(this.pageSize, num, this.priceRange, this.sortByPrice);
         },
         prevPage() {
-          if(this.currentPage == 1){
+          if(this.page == 1){
             return;
           }
-          this.$parent.currentPage--;
-          this.getProducts(this.pageSize, this.currentPage, this.priceRange, this.sortByPrice);
+          this.$parent.page--;
+          this.getProducts(this.pageSize, this.page, this.priceRange, this.sortByPrice);
         },
         nextPage() {
-          if(this.currentPage == this.pages){
+          if(this.page == this.pages){
             return;
           }
-          this.$parent.currentPage++;
-          this.getProducts(this.pageSize, this.currentPage, this.priceRange, this.sortByPrice);
+          this.$parent.page++;
+          this.getProducts(this.pageSize, this.page, this.priceRange, this.sortByPrice);
         }
       }
     }

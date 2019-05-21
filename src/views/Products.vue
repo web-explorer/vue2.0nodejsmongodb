@@ -108,7 +108,7 @@
                 </ul>
 
                 <p v-show="count" class="text-right">总计：<b>{{count}}</b>个商品</p>
-                <pagination v-show="pages" v-bind:currentPage="currentPage" v-bind:getProducts="getProducts" v-bind:pageSize="pageSize" v-bind:priceRange="priceChecked" v-bind:sortByPrice="sortByPrice" v-bind:pages="pages"></pagination>
+                <pagination v-show="pages" v-bind:defaultPages="defaultPages" v-bind:page="page" v-bind:getProducts="getProducts" v-bind:pageSize="pageSize" v-bind:priceRange="priceChecked" v-bind:sortByPrice="sortByPrice" v-bind:pages="pages"></pagination>
 
               </div>
             </div>
@@ -147,9 +147,10 @@
             currProductNum: 0,
             addCartFail: false,
             addCartSucc: false,
-            currentPage: 1,
+            page: 1,
+            defaultPages: 5,
             sortByPrice: 0,
-            pageSize: 3,
+            pageSize: 2,
             count: 0,
             sortByPrice: 0,
             pages: 0,

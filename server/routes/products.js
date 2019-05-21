@@ -7,7 +7,7 @@ var User = require('./../models/User');
 //定义返回数据的格式
 var responseData;
 
-router.use(function(req, res, next){
+router.use(function(req, res, next){console.log('商品路由');
   responseData = {
     code: 0,
     msg: ''
