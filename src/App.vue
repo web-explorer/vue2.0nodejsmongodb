@@ -11,6 +11,7 @@ export default {
 </script>
 
 <style lang="css">
+  @import './assets/css/base.css';
   @import "./../node_modules/font-awesome/css/font-awesome.css";
   @import "./../node_modules/@neos21/bootstrap3-glyphicons/dist/css/bootstrap3-glyphicons.css";
   .left {

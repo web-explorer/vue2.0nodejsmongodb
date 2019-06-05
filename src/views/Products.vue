@@ -17,10 +17,10 @@
             <div class="filter stopPop" id="filter" v-bind:class="{'filterby-show': filterBy}">
               <dl class="filter-price">
                 <dt>Price:</dt>
-                <dd><a href="javascript:void(0)" @click="setPriceFilter(-1)" v-bind:class="{'cur': priceChecked == -1}">All</a></dd>
+                <dd><a href="javascript:void(0)" @click="setPriceFilter(-1)" v-bind:class="{'cur': priceRangeFlag == -1}">All</a></dd>
 
                 <dd v-for="(price, index) in priceFilter">
-                  <a href="javascript:void(0)" @click="setPriceFilter(index)" v-bind:class="{'cur': priceChecked == index}">{{price.startPrice}} - {{price.endPrice}}</a>
+                  <a href="javascript:void(0)" @click="setPriceFilter(index)" v-bind:class="{'cur': priceRangeFlag == index}">{{price.startPrice}} - {{price.endPrice}}</a>
                 </dd>
 
                 <!--<dd>
@@ -106,10 +106,10 @@
                     </div>
                   </li>-->
                 </ul>
-
-                <p v-show="count" class="text-right">总计：<b>{{count}}</b>个商品</p>
-                <pagination v-show="pages" v-bind:defaultPages="defaultPages" v-bind:page="page" v-bind:getProducts="getProducts" v-bind:pageSize="pageSize" v-bind:priceRange="priceChecked" v-bind:sortByPrice="sortByPrice" v-bind:pages="pages"></pagination>
-
+                <p class="text-right">总计：<b>{{total}}</b>个商品</p>
+                <div class="text-center">
+                  <pagination v-bind:defaultPages="defaultPages" v-bind:pages="pages" v-bind:page="page" @turnTo="turnTo"></pagination>
+                </div>
               </div>
             </div>
           </div>
@@ -140,6 +140,9 @@
     import NavBread from '@/components/NavBread'
     import Pagination from '@/components/Pagination'
     import axios from 'axios'
+
+    import {getProducts} from "../api/products";
+
     export default {
         name: "Products",
         data() {
@@ -150,11 +153,11 @@
             page: 1,
             defaultPages: 5,
             sortByPrice: 0,
-            pageSize: 2,
-            count: 0,
+            pageSize: 2,//每页展示商品数
+            total: 0,//商品总数
             sortByPrice: 0,
-            pages: 0,
-            products: [],
+            pages: 0,//总页数
+            products: [],//当前页商品集合
             priceFilter: [
               {
                 startPrice: '0.00',
@@ -173,7 +176,7 @@
                 endPrice: '4000.00'
               }
             ],
-            priceChecked: -1,
+            priceRangeFlag: -1,
             filterBy: false,
             overLayFlag: false
           };
@@ -186,18 +189,18 @@
           Modal
         },
         mounted() {
-          this.getProducts(this.pageSize, this.currentPage, this.priceChecked, this.sortByPrice);
+          this._getProducts(this.pageSize, this.page, this.priceRangeFlag, this.sortByPrice);
         },
         methods: {
-          getProducts(pageSize, pageNum, priceRange, sortByPrice) {
-            axios.get(`/products/select?pageSize=${pageSize}&pageNum=${pageNum}&priceRange=${priceRange}&sortByPrice=${sortByPrice}`).then((obj) => {
-              let data = obj.data;
-              if(data.code == 0){
-                this.count = data.result.count;
-                this.pages = data.result.pages;
-                this.products = data.result.products;
+          _getProducts() {
+            getProducts(this.pageSize, this.page, this.priceRangeFlag, this.sortByPrice).then((response) => {
+              let res = response.data;
+              if(res.code == 0){
+                this.total = res.result.count;
+                this.pages = res.result.pages;
+                this.products = res.result.products;
               }else{
-                alert(data.msg);
+                alert(res.msg);
               }
             });
           },
@@ -206,12 +209,12 @@
             this.overLayFlag = true;
           },
           setPriceFilter(index) {
-            if(this.priceChecked == index){
+            if(this.priceRangeFlag == index){
 
             }else{
-              this.priceChecked = index;
-              this.currentPage = 1;
-              this.getProducts(this.pageSize, this.currentPage, this.priceChecked, this.sortByPrice);
+              this.priceRangeFlag = index;
+              this.page = 1;
+              this._getProducts();
             }
             this.closePop();
           },
@@ -229,8 +232,8 @@
                 this.sortByPrice = this.sortByPrice * -1;
               }
             }
-            this.currentPage = 1;
-            this.getProducts(this.pageSize, this.currentPage, this.priceChecked, this.sortByPrice);
+            this.page = 1;
+            this._getProducts();
           },
           addCart(str){
             let that = this;
@@ -255,15 +258,15 @@
                 this.currProductNum = 0;
                 break;
             }
+          },
+          turnTo(page) {
+            this.page = page;
+            this._getProducts();
           }
         }
     }
 </script>
 
-<style>
-  @import './../assets/css/base.css';
+<style scoped lang="css">
   @import './../assets/css/product.css';
-</style>
-<style scoped>
-
 </style>

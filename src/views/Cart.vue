@@ -333,8 +333,7 @@
     }
 </script>
 
-<style scoped>
-  @import './../assets/css/base.css';
+<style scoped lang="css">
   @import './../assets/css/product.css';
   @import "./../assets/css/checkout.css";
   .input-sub,.input-add{

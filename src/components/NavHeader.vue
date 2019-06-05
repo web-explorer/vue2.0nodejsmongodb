@@ -133,7 +133,7 @@
     }
 </script>
 
-<style scoped>
+<style scoped lang="css">
   @import "./../assets/css/login.css";
   .header {
     width: 100%;
