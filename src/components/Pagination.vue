@@ -40,40 +40,30 @@
             return;
           }
           this.$emit('turnTo', 1);
-         /* this.$parent.page = 1;
-          this.getProducts(this.pageSize, 1, this.priceRange, this.sortByPrice);*/
         },
         requestLastPage() {
           if(this.page == this.pages) {
             return;
           }
           this.$emit('turnTo', this.pages);
-          /*this.$parent.page = this.pages;
-          this.getProducts(this.pageSize, this.pages, this.priceRange, this.sortByPrice);*/
         },
         requertPage(num) {
           if(this.page == num) {
             return;
           }
           this.$emit('turnTo', num);
-          /*this.$parent.page = num;
-          this.getProducts(this.pageSize, num, this.priceRange, this.sortByPrice);*/
         },
         prevPage() {
           if(this.page == 1){
             return;
           }
           this.$emit('turnTo', this.page - 1);
-          /*this.$parent.page--;
-          this.getProducts(this.pageSize, this.page, this.priceRange, this.sortByPrice);*/
         },
         nextPage() {
           if(this.page == this.pages){
             return;
           }
           this.$emit('turnTo', this.page + 1);
-         /* this.$parent.page++;
-          this.getProducts(this.pageSize, this.page, this.priceRange, this.sortByPrice);*/
         }
       }
     }

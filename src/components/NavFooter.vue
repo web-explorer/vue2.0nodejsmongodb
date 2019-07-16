@@ -12,14 +12,14 @@
             </select>
           </div>
           <div class="footer__secondary__nav">
-            <span>Copyright © 2017 IMooc All Rights Reserved.</span>
-            <a href="http://us.lemall.com/us/aboutUs.html">
+            <span>Copyright © 2019 mystic All Rights Reserved.</span>
+            <a href="javascript:;">
               About Us
             </a>
-            <a href="http://us.lemall.com/us/termsofUse.html">
+            <a href="javascript:;">
               Terms &amp; Conditions
             </a>
-            <a href="http://us.lemall.com/us/privacyPolicy.html">
+            <a href="javascript:;">
               Privacy Policy
             </a>
           </div>

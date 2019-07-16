@@ -52,7 +52,7 @@
                       <div class="name">{{item.productName}}</div>
                       <div class="price">{{item.salePrice}}</div>
                       <div class="btn-area">
-                        <a href="javascript:;" class="btn btn--m" @click="addCart(item.productId)">加入购物车</a>
+                        <a href="javascript:;" class="btn btn--m" @click="addCart(item.productId, $event)">加入购物车</a>
                       </div>
                     </div>
                   </li>
@@ -140,6 +140,11 @@
     import NavBread from '@/components/NavBread'
     import Pagination from '@/components/Pagination'
     import axios from 'axios'
+    // import $ from 'jquery'
+    import './../util/jquery-ui'
+    /*import 'jquery-ui/ui/core'
+    import 'jquery-ui/ui/effect'
+    import 'jquery-ui/ui/effects/effect-shake'*/
 
     import {getProducts} from "../api/products";
 
@@ -235,11 +240,44 @@
             this.page = 1;
             this._getProducts();
           },
-          addCart(str){
+          addCart(str, e){
+
+            let cart = $('.header .navbar-cart-container svg');
+            let imgtodrag = $(e.currentTarget).parent().parent().prev().find('img:first');
+
             let that = this;
             axios.post('products/addCart', {userName: this.$refs.navHeader.nickname, productId: str}).then(function(response){
               let res = response.data;
               if(res.code == 0){
+
+                if (imgtodrag.length) {
+                  let imgclone = imgtodrag.clone().offset({
+                    top: imgtodrag.offset().top,
+                    left: imgtodrag.offset().left
+                  }).css({
+                    'opacity': '0.5',
+                    'position': 'absolute',
+                    'height': '150px',
+                    'width': '150px',
+                    'z-index': '100'
+                  }).appendTo($('body')).animate({
+                    'top': cart.offset().top + 10,
+                    'left': cart.offset().left + 10,
+                    'width': 75,
+                    'height': 75
+                  }, 1000);
+                  setTimeout(function () {
+                    console.log(cart[0]);
+                    cart.effect('shake', { times: 2 }, 200);
+                  }, 1500);
+                  imgclone.animate({
+                    'width': 0,
+                    'height': 0
+                  }, function () {
+                    $(this).detach();
+                  });
+                }
+
                 that.currProductNum = res.result;
                 that.addCartSucc = true;
                 that.$store.commit('updateCartCount', 1);
