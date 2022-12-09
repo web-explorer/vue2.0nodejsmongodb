@@ -15,7 +15,7 @@
     "body-parser": "^1.18.3",
     "bootstrap": "^3.3.5",
     "cookies": "^0.7.3",
-    "express": "^4.16.4",
+    "express": "^4.17.3",
     "font-awesome": "^4.7.0",
     "jquery-ui": "^1.12.1",
     "less": "^3.9.0",
